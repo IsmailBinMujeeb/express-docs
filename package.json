@@ -1,5 +1,5 @@
 {
-  "name": "express-docs",
+  "name": "exp-docs",
   "version": "1.0.0",
   "description": "express docs generator",
   "main": "index.js",

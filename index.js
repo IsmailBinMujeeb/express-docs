@@ -18,7 +18,7 @@ export default (url="/", options={}) => {
 
         if (!(ext == 'json' || ext == 'yaml' || ext == 'yml')) ext = 'json';
 
-        const fileContent = fs.readFileSync(path.join(__dirname, `${file}.${ext}`), 'utf-8');
+        const fileContent = fs.readFileSync(path.join(__dirname, "../../", `${file}.${ext}`), 'utf-8');
 
         let jsonData = null;
         if (ext === 'json') jsonData = JSON.parse(fileContent)
