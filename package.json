@@ -1,6 +1,6 @@
 {
   "name": "exp-docs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "express docs generator",
   "main": "index.js",
   "type": "module",
