@@ -19,19 +19,16 @@
 ## Installation
 
 ```bash
-npm install express-docs
+npm install exp-docs ejs
 ```
 
 ## Usage
 ```js
 const express = require('express');
-const expressDocs = require('express-docs');
+const expressDocs = require('exp-docs');
 const app = express();
 
-app.set("view engine", "ejs");
-app.use(express.static("public"));
-
-// Setup the docs middleware
+// Setup the docs endpoint
 app.use('/docs', expressDocs());
 
 app.listen(3000, () => {
@@ -42,9 +39,17 @@ app.listen(3000, () => {
 
 | Option | Type | Description |
 |--------|------|-------------|
-| file | string | Path to your JSON or YAML API definition |
-| engine | string | Template engine to use: 'ejs', 'pug', 'hbs' |
-| url	| string | url for rendering docs |
+| file? | string | Path to your JSON or YAML API definition |
+| ext? | string | ext name could be json, yaml or yml |
+| engine? | string | Template engine to use: 'ejs', 'pug', 'hbs' |
+
+# Options Example
+
+```js
+
+// The docs will render on http://localhost:3000/api/v1/docs
+app.use("/api/v1", expressDocs("/docs", {file: "./docs", ext: "yaml", engine: "pug"}))
+```
 
 # Demo
 Live demo coming soon!
