@@ -24,6 +24,6 @@ export default (url="/", options={}) => {
         if (ext === 'json') jsonData = JSON.parse(fileContent)
         else if (ext === 'yaml' || ext === 'yml') jsonData = YAML.parse(fileContent)
     
-        res.render(`${engine}-express-docs`, { docs: jsonData || null });
+        res.render(`/node_modules/exp-docs/views/${engine}-express-docs`, { docs: jsonData || null });
     })
 };
