@@ -19,11 +19,12 @@ export default (url="/", options={}) => {
         if (!(ext == 'json' || ext == 'yaml' || ext == 'yml')) ext = 'json';
 
         const fileContent = fs.readFileSync(path.join(__dirname, "../../", `${file}.${ext}`), 'utf-8');
+        const templatePath = path.join(__dirname, "views", `${engine}-express-docs.${engine}`);
 
         let jsonData = null;
         if (ext === 'json') jsonData = JSON.parse(fileContent)
         else if (ext === 'yaml' || ext === 'yml') jsonData = YAML.parse(fileContent)
     
-        res.render(`/node_modules/exp-docs/views/${engine}-express-docs`, { docs: jsonData || null });
+        res.render(templatePath, { docs: jsonData || null });
     })
 };
