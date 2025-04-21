@@ -1,0 +1,33 @@
+{
+  "name": "express-docs",
+  "version": "1.0.0",
+  "description": "express docs generator",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IsmailBinMujeeb/express-docs.git"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "docs",
+    "generator"
+  ],
+  "author": "@ismailbinmujeeb (ismailbinmujeeb@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IsmailBinMujeeb/express-docs/issues"
+  },
+  "homepage": "https://github.com/IsmailBinMujeeb/express-docs#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "hbs": "^4.2.0",
+    "pug": "^3.0.3",
+    "yaml": "^2.7.1"
+  }
+}

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <%= docs?.title || "express-docs" %>
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/express-docs.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <%= docs?.title || "express-docs" %>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Toggle Theme</button>
+    </header>
+
+    <p style="margin-bottom: 2rem; font-weight: 600;">API Version: <span style="color: var(--accent)">v<%= docs?.version
+                || "1.0.0" %></span></p>
+    <p style="margin-bottom: 2rem;">
+        <%= docs?.description %>
+    </p>
+
+    <% docs?.sections?.forEach(section=> { %>
+        <div class="doc-section">
+
+            <div class="section-toggle" onclick="toggleSection('<%= section.name %>')">
+                <h2>
+                    <%= section.name %>
+                </h2>
+            </div>
+
+            <div id="<%= section?.name %>">
+                <% section?.endpoints.forEach(endpoint=> { %>
+                    <div class="endpoint">
+                        <h3>
+                            <%= endpoint.name %>
+                        </h3>
+                        <p class="description">
+                            <%= endpoint.description %>
+                        </p>
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <div><span class="method <%= endpoint.method %>">
+                                    <%= endpoint.method %>
+                                </span><span id="<%= endpoint?.name %>">
+                                    <%= endpoint.url %>
+                                </span>
+
+                            </div>
+                            <div>➕</div>
+                        </div>
+                        <div class="endpoint-body">
+
+                            <% if (endpoint?.query) { %>
+                                <div class="query-params">
+                                    <label><strong>Query Parameters:</strong></label>
+                                    <table class="query-edit-table">
+                                        <tbody>
+                                            <% for( let i=0; i < endpoint?.query?.length; i++ ) { %>
+                                                <tr>
+                                                    <td><strong>
+                                                            <%= endpoint?.query?.[i].key %>
+                                                        </strong></td>
+                                                    <td><input type="text"
+                                                            placeholder="<%= endpoint?.query?.[i].value %>"
+                                                            onchange="updateQuery(this, '<%= endpoint?.query?.[i].key %>', '<%= endpoint?.name %>')">
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <% } %>
+                                    <div class="body-input">
+                                        <label>Request Body (JSON):</label>
+                                        <textarea id="body-<%= endpoint.url %>-<%= endpoint.method %>"
+                                            rows="4"><%= JSON.stringify(endpoint.body) %></textarea>
+                                    </div>
+                                    <% if (endpoint?.file) { %>
+                                        <div class="file-upload">
+                                            <label>
+                                                <%= endpoint.file %>:
+                                            </label>
+                                            <input type="file" id="<%= endpoint.file %>-file"
+                                                onchange="previewFile('<%= endpoint.file %>')">
+                                            <div class="file-preview" id="<%= endpoint.file %>-preview"></div>
+                                        </div>
+                                        <% } %>
+                                            <div class="try-it">
+                                                <button class="try-button"
+                                                    onclick="tryApi('body-<%= endpoint.url %>-<%= endpoint.method %>', '<%= endpoint?.file || `` %>', '<%= endpoint.name %>', '<%= endpoint.method %>')">Try
+                                                    it</button>
+                                                <pre class="response-output"
+                                                    id="output-<%= endpoint.url %>-<%= endpoint.method %>">Waiting for request...</pre>
+                                            </div>
+                                            <div class="responses">
+                                                <h4>Possible Responses:</h4>
+                                                <div class="status-codes">
+                                                    <span>✅ <strong>200:</strong> Login successful, returns JWT
+                                                        token</span>
+                                                    <span>❌ <strong>401:</strong> Invalid credentials</span>
+                                                </div>
+                                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+        <% }) %>
+
+            <script>
+                function toggleTheme() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const nextTheme = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', nextTheme);
+                    localStorage.setItem('theme', nextTheme);
+                }
+
+                window.onload = () => {
+                    const savedTheme = localStorage.getItem('theme') || 'light';
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                }
+
+                function previewFile(idPrefix) {
+                    const input = document.getElementById(`${idPrefix}-file`);
+                    const preview = document.getElementById(`${idPrefix}-preview`);
+                    preview.innerHTML = '';
+                    const file = input.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            preview.appendChild(img);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
+
+                function updateQuery(input, key, spanId) {
+                    const value = input.value.trim();
+                    const urlSpan = document.getElementById(spanId);
+                    let newUrl = urlSpan.textContent.trim();
+
+                    // Break the URL into base and query
+                    let [baseUrl, queryString] = newUrl.split("?");
+                    let params = new URLSearchParams(queryString || "");
+
+                    // Update or set the key
+                    if (value) params.set(key, value);
+                    else params.delete(key)
+
+                    // Build final URL
+                    const updatedUrl = `${baseUrl}?${params.toString()}`;
+                    urlSpan.textContent = updatedUrl;
+                }
+
+                async function tryApi(bodyId, fileId, urlId, method = 'POST') {
+                    const outputId = bodyId.replace('body', 'output');
+                    const bodyText = document.getElementById(bodyId).value;
+                    const url = document.getElementById(urlId).textContent.trim();
+                    const fileInput = document.getElementById(fileId);
+                    const fullUrl = window.location.origin + url;
+
+                    try {
+                        let response;
+
+                        // Validate JSON if no file
+                        if (!fileInput?.files?.length && method !== "GET") {
+                            try {
+                                JSON.parse(bodyText);
+                            } catch (e) {
+                                document.getElementById(outputId).textContent = 'Invalid JSON in request body!';
+                                return;
+                            }
+                        }
+
+                        if (fileInput && fileInput?.files?.length > 0) {
+                            const formData = new FormData();
+                            formData.append('file', fileInput.files[0]);
+                            formData.append('json', new Blob([bodyText], { type: 'application/json' }));
+
+                            response = await fetch(fullUrl, {
+                                method,
+                                body: method === "GET" ? undefined : formData
+                            });
+                        } else {
+                            response = await fetch(fullUrl, {
+                                method,
+                                headers: method !== "GET" ? { 'Content-Type': 'application/json' } : undefined,
+                                body: method === "GET" ? undefined : bodyText
+                            });
+                        }
+
+                        const contentType = response.headers.get("content-type");
+
+                        let result;
+                        if (contentType && contentType.includes("application/json")) {
+                            result = await response.json();
+                            document.getElementById(outputId).textContent =
+                                `Status: ${response.status}\n` + JSON.stringify(result, null, 2);
+                        } else {
+                            result = await response.text();
+                            document.getElementById(outputId).innerHTML =`<h3>Status: ${response.status}</h3>${result}`;
+                        }
+
+                    } catch (err) {
+                        document.getElementById(outputId).textContent = 'Error: ' + err.message;
+                    }
+                }
+
+                function toggleEndpoint(headerEl) {
+                    const bodyEl = headerEl.nextElementSibling;
+                    const isVisible = bodyEl.style.display === 'block';
+                    bodyEl.style.display = isVisible ? 'none' : 'block';
+                    headerEl.querySelector('div:last-child').textContent = isVisible ? '➕' : '➖';
+                }
+
+                function toggleSection(id) {
+                    const section = document.getElementById(id);
+                    section.hidden = !section.hidden;
+                }
+            </script>
+</body>
+
+</html>
